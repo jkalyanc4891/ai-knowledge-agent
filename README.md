@@ -147,33 +147,23 @@ docker run \
 
 ```
 
-## 📐 System Diagrams
+## 📐 Architecture Diagrams
 
-<div>
-  <ul>
-    <li><a href="#arch">Architecture</a></li>
-    <li><a href="#seq">Sequence</a></li>
-    <li><a href="#class">Class Diagram</a></li>
-  </ul>
-</div>
-
----
-
-### <a name="arch"></a> 🧱 Architecture Diagram
+<details>
+  <summary><strong>🧱 Architecture Diagram</strong></summary>
 
 ![Architecture Diagram](./docs/architecture.png)
 
----
+</details>
 
-### <a name="seq"></a> 📊 Sequence Diagram
+<details>
+  <summary><strong>📊 Sequence Diagram</strong></summary>
 
 ![Sequence Diagram](./docs/sequence.png)
 
----
+</details>
 
-### <a name="class"></a> 🏗️ Class Diagram
 
-![Class Diagram](./docs/class.png)
 
 
 ### 📁 Project Structure
