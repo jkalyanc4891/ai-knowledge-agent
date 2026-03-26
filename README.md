@@ -147,6 +147,35 @@ docker run \
 
 ```
 
+## 📐 System Diagrams
+
+<div>
+  <ul>
+    <li><a href="#arch">Architecture</a></li>
+    <li><a href="#seq">Sequence</a></li>
+    <li><a href="#class">Class Diagram</a></li>
+  </ul>
+</div>
+
+---
+
+### <a name="arch"></a> 🧱 Architecture Diagram
+
+![Architecture Diagram](./docs/architecture.png)
+
+---
+
+### <a name="seq"></a> 📊 Sequence Diagram
+
+![Sequence Diagram](./docs/sequence.png)
+
+---
+
+### <a name="class"></a> 🏗️ Class Diagram
+
+![Class Diagram](./docs/class.png)
+
+
 ### 📁 Project Structure
 ```
 ai-knowledge-agent/
