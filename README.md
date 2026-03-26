@@ -173,5 +173,5 @@ ai-knowledge-agent/
 
 This project is licensed under the **MIT License**.
 
-> See the [LICENSE](LICENSE) file in the root directory for more information.
+> See the [LICENSE](MIT LICENSE) file in the root directory for more information.
 
