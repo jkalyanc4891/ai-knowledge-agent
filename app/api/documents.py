@@ -37,3 +37,8 @@ async def upload_document(file: UploadFile = File(...)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/{doc_id}")
+def delete_document(doc_id: str):
+    vector_store.delete_document(doc_id)
+    return {"status": "deleted"}

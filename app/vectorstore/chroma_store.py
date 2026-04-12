@@ -67,3 +67,6 @@ class ChromaVectorStore(BaseVectorStore):
             )
 
         return hits
+
+    def delete_document(self, doc_id: str):
+        self.collection.delete(where={"document_id": doc_id})

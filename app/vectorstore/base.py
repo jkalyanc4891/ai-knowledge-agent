@@ -24,6 +24,10 @@ class BaseVectorStore(ABC):
         ...
 
     @abstractmethod
+    def delete_document(self, doc_id: str) -> None:
+        ...
+
+    @abstractmethod
     def search(
         self,
         query: str,

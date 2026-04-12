@@ -64,7 +64,7 @@ APP_NAME="AI Knowledge & Decision Support System"
 APP_ENV=local
 
 # AI Service Provider
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=<your_openai_api_key_here>
 OPENAI_MODEL=gpt-5.4-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-large
 

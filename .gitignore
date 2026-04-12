@@ -1,10 +1,99 @@
-# IntelliJ / PyCharm
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.egg-info/
+*.egg
+*.log
+
+# Virtual environments
+venv/
+.env/
+.env.*
+
+
+# -----------------------------
+# FastAPI / Uvicorn / Logs
+# -----------------------------
+*.db
+*.sqlite3
+*.sqlite
+*.pid
+*.log
+logs/
+*.tmp
+
+
+# -----------------------------
+# ChromaDB
+# -----------------------------
+chroma/
+chroma_db/
+chroma_data/
+*.chroma
+*.parquet
+
+
+# -----------------------------
+# Streamlit
+# -----------------------------
+.streamlit/
+.streamlit_cache/
+.streamlit_cache/*
+
+
+# -----------------------------
+# IDE / Editor Files
+# -----------------------------
+
+# PyCharm / IntelliJ
 *.iml
 .idea/
 
-.venv/
-venv
+# VSCode
+.vscode/
+.history/
+*.code-workspace
 
-*.bin
-*sqlite*
-*.chroma
+
+# -----------------------------
+# OS / System Files
+# -----------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+
+# -----------------------------
+# Build / Packaging
+# -----------------------------
+dist/
+build/
+*.spec
+
+
+# -----------------------------
+# Project-specific folders
+# -----------------------------
+# Your repo structure includes:
+# app/api, app/agents, app/rag, app/vectorstore, streamlit_app, etc.
+# Nothing here needs to be ignored except generated artifacts.
+
+app/__pycache__/
+streamlit_app/__pycache__/
+
+
+# -----------------------------
+# Environment / Secrets
+# -----------------------------
+# You already use a .env file — keep it out of Git
+.env
+.env.local
+.env.dev
+.env.prod
+.env.test
