@@ -80,4 +80,6 @@ class AgentOrchestrator:
             "sources": rag_result.sources,
             "confidence": validation.get("confidence"),
             "grounded": validation.get("grounded"),
+            "safe": validation.get("full_report", {}).get("safe"),
+            "safety_report": validation.get("full_report"),
         }

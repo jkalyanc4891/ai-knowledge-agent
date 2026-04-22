@@ -9,6 +9,7 @@ class ValidatorAgent:
     - Checks grounding
     - Detects hallucinations
     - Assigns a confidence score
+
     """
 
     def __init__(self):

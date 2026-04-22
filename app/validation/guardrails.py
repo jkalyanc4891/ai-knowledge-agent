@@ -1,67 +1,169 @@
-from dataclasses import dataclass
+import re
 from typing import Dict, Any
-from .policies import SafetyPolicy, SafetySeverity
-from .classifiers import PIIClassifier, ToxicityClassifier
-from .filters import RedactionFilter
-from .audit import SafetyAuditLogger
+from abc import ABC, abstractmethod
+from openai import OpenAI
+
+from app.core.config import settings
+from app.agents.validator_agent import ValidatorAgent
 
 
-@dataclass
-class SafetyDecision:
-    allowed: bool
-    modified_text: str
-    reasons: Dict[str, Any]
+# ============================================================
+# Base Interface
+# ============================================================
 
+class SafetyClassifier(ABC):
+    """
+    Base interface for all safety classifiers.
+    """
+
+    @abstractmethod
+    def classify(self, text: str) -> Dict[str, Any]:
+        ...
+
+
+# ============================================================
+# PII Classifier
+# ============================================================
+
+class PIIClassifier(SafetyClassifier):
+    """
+    Detects emails, phone numbers, and optionally uses LLM refinement.
+    """
+
+    EMAIL_REGEX = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
+    PHONE_REGEX = re.compile(r"\+?\d[\d\-\s]{7,}\d")
+
+    def __init__(self, use_llm: bool = False):
+        self.use_llm = use_llm
+        self.client = OpenAI(api_key=settings.OPENAI_API_KEY) if use_llm else None
+        self.model = settings.OPENAI_MODEL
+
+    def classify(self, text: str) -> Dict[str, Any]:
+        findings = {
+            "email": bool(self.EMAIL_REGEX.search(text)),
+            "phone": bool(self.PHONE_REGEX.search(text)),
+        }
+
+        # Optional LLM refinement
+        if self.use_llm and self.client:
+            prompt = (
+                "Identify if the following text contains sensitive PII "
+                "(names, addresses, IDs, financial info). Respond with JSON: "
+                "{'pii_present': bool}.\n\n"
+                f"Text:\n{text}"
+            )
+            resp = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0,
+            )
+            findings["llm_pii"] = "true" in resp.choices[0].message.content.lower()
+
+        findings["pii_present"] = any(v for v in findings.values())
+        return findings
+
+
+# ============================================================
+# Toxicity Classifier
+# ============================================================
+
+class ToxicityClassifier(SafetyClassifier):
+    """
+    LLM-based toxicity / harmful content classifier.
+    """
+
+    def __init__(self):
+        self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        self.model = settings.OPENAI_MODEL
+
+    def classify(self, text: str) -> Dict[str, Any]:
+        prompt = (
+            "Classify whether the following text is toxic, hateful, or promotes self-harm. "
+            "Respond with JSON: {'toxic': bool, 'self_harm': bool}.\n\n"
+            f"Text:\n{text}"
+        )
+        resp = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+        )
+        content = resp.choices[0].message.content.lower()
+
+        return {
+            "toxic": "true" in content or "toxic" in content,
+            "self_harm": "true" in content or "self_harm" in content,
+        }
+
+
+# ============================================================
+# Hallucination / Grounding Classifier
+# ============================================================
+
+class HallucinationClassifier(SafetyClassifier):
+    """
+    Wraps your existing ValidatorAgent to check grounding.
+    """
+
+    def __init__(self):
+        self.validator = ValidatorAgent()
+
+    def classify(self, answer: str, context: str) -> Dict[str, Any]:
+        """
+        Returns:
+            {
+                "grounded": bool,
+                "confidence": float,
+                "explanation": str
+            }
+        """
+        return self.validator.validate(answer, context)
+
+
+# ============================================================
+# Unified Safety Engine
+# ============================================================
 
 class SafetyEngine:
     """
-    Central safety/guardrails engine:
-    - Evaluates policies
-    - Runs classifiers
-    - Applies filters
-    - Logs decisions
+    Runs all safety checks:
+    - PII
+    - Toxicity
+    - Hallucination / grounding
     """
 
-    def __init__(self, policy: SafetyPolicy | None = None):
-        self.policy = policy or SafetyPolicy()
-        self.pii_classifier = PIIClassifier(use_llm=False)
-        self.toxicity_classifier = ToxicityClassifier()
-        self.redaction_filter = RedactionFilter()
+    def __init__(self, use_llm_for_pii: bool = False):
+        self.pii = PIIClassifier(use_llm=use_llm_for_pii)
+        self.toxicity = ToxicityClassifier()
+        self.hallucination = HallucinationClassifier()
 
-    def evaluate(self, text: str, stage: str = "response") -> SafetyDecision:
-        reasons: Dict[str, Any] = {}
+    def run(self, answer: str, context: str) -> Dict[str, Any]:
+        """
+        Runs all guardrails and returns a unified safety report.
+        """
 
-        # PII
-        pii_rules = self.policy.get_rules_by_category("pii")
-        if pii_rules:
-            pii_result = self.pii_classifier.classify(text)
-            reasons["pii"] = pii_result
+        pii_result = self.pii.classify(answer)
+        toxicity_result = self.toxicity.classify(answer)
+        hallucination_result = self.hallucination.classify(answer, context)
 
-        # Toxicity / self-harm
-        tox_rules = self.policy.get_rules_by_category("toxicity") + \
-                    self.policy.get_rules_by_category("self_harm")
-        if tox_rules:
-            tox_result = self.toxicity_classifier.classify(text)
-            reasons["toxicity"] = tox_result
+        return {
+            "pii": pii_result,
+            "toxicity": toxicity_result,
+            "hallucination": hallucination_result,
+            "safe": (
+                not pii_result.get("pii_present", False)
+                and not toxicity_result.get("toxic", False)
+                and hallucination_result.get("grounded", False)
+            ),
+        }
 
-        # Decide allow/block
-        allowed = True
 
-        if reasons.get("pii", {}).get("pii_present"):
-            # For now, we redact instead of blocking
-            text = self.redaction_filter.apply(text)
-            reasons["action_pii"] = "redacted"
+# ============================================================
+# Convenience Function (Used by Orchestrator)
+# ============================================================
 
-        if reasons.get("toxicity", {}).get("toxic") or reasons.get("toxicity", {}).get("self_harm"):
-            # High severity → block
-            allowed = False
-            reasons["action_toxicity"] = "blocked"
-
-        decision = SafetyDecision(
-            allowed=allowed,
-            modified_text=text,
-            reasons=reasons,
-        )
-
-        SafetyAuditLogger.log_decision(stage=stage, input_text=text, decision=reasons)
-        return decision
+def run_guardrails(answer: str, context: str) -> Dict[str, Any]:
+    """
+    Single entry point used by the orchestrator.
+    """
+    engine = SafetyEngine()
+    return engine.run(answer, context)
