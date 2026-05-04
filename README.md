@@ -147,21 +147,13 @@ docker run \
 
 ```
 
-## 📐 Architecture Diagrams
+## 📐 Architecture [SENSE -> PLAN -> ACT]
 
-<details>
-  <summary><strong>🧱 Architecture Diagram</strong></summary>
+[`ARCHITECTURE DIAGRAM`](./ARCHITECTURE.md)
 
-![Architecture Diagram](./docs/architecture.png)
+## 📊 Sequence Diagram
 
-</details>
-
-<details>
-  <summary><strong>📊 Sequence Diagram</strong></summary>
-
-![Sequence Diagram](./docs/sequence.png)
-
-</details>
+[`SEQUENCE DIAGRAM`](./SEQUENCE_DAIGRAM.md)
 
 
 
