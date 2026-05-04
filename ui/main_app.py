@@ -6,8 +6,8 @@ from api_client import APIClient
 # Config & API Client
 # -----------------------------------
 API_BASE_URL = "http://localhost:8000/api"
-MAX_UPLOAD_MB = 50
-
+MAX_UPLOAD_MB = 30
+MAX_FILES = 10
 api = APIClient(base_url=API_BASE_URL)
 
 
@@ -47,14 +47,18 @@ def render_document_uploader():
     st.subheader("📄 Upload Document")
 
     uploaded_files = st.file_uploader(
-        "Choose files (max 50 MB each)",
+        "Choose files (max 30 MB each)",
         type=["pdf", "txt", "csv", "xlsx"],
         accept_multiple_files=True,
         key=f"uploader_{st.session_state.uploader_key}",
-        max_upload_size=50# 🔥 resets when key changes
+        max_upload_size=MAX_UPLOAD_MB# 🔥 resets when key changes
     )
 
     if not uploaded_files:
+        return
+
+    if len(uploaded_files) > MAX_FILES:
+        st.error(f"⚠️ You selected {len(uploaded_files)} files. Limit is {MAX_FILES}.")
         return
 
     for file in uploaded_files:
@@ -224,8 +228,8 @@ def main():
             ---
             **ℹ️ Note**
 
-            - **Refresh / Reset** will delete *all* uploaded documents from **Chroma** and clear the UI.
-            - **Remove** will only remove the file from the **uploaded list** in the UI (and also deletes it from Chroma for that single file).
+            - **Refresh / Reset** will delete *all* uploaded documents from **VectorDB** and clear the UI.
+            - **Remove** will remove the file from the **uploaded list** in the UI (and also deletes it from VectorDB for that single file).
             """
         )
 
