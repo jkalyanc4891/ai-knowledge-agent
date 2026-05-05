@@ -5,6 +5,8 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](#)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Enabled-orange)](#)
 [![License](https://img.shields.io/badge/License-MIT-green)](#)
+[![Architecture](https://img.shields.io/badge/Architecture-View-purple)](./ARCHITECTURE.md)
+[![Sequence Diagram](https://img.shields.io/badge/Sequence-View-purple)](./SEQUENCE_DAIGRAM.md)
 
 > **An enterprise-grade document intelligence system that leverages agentic retrieval-augmented generation (RAG) to transform static files into an interactive, conversational knowledge engine.**
 
@@ -147,16 +149,11 @@ docker run \
 
 ```
 
-## 📐 Architecture [SENSE -> PLAN -> ACT]
+## 📐 System Design [SENSE -> PLAN -> ACT]
 
-[`ARCHITECTURE DIAGRAM`](./ARCHITECTURE.md)
+[View Full Architecture Document](./ARCHITECTURE.md)
 
-## 📊 Sequence Diagram
-
-[`SEQUENCE DIAGRAM`](./SEQUENCE_DAIGRAM.md)
-
-
-
+[View Full Sequence Diagram](./SEQUENCE_DAIGRAM.md)
 
 ### 📁 Project Structure
 ```
