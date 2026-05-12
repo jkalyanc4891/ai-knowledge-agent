@@ -9,7 +9,7 @@ def render_header():
 
 def render_document_uploader() -> Any:
     st.subheader("📄 Upload Document")
-    return st.file_uploader("Choose a file", type=["pdf", "txt", "csv", "xlsx"])
+    return st.file_uploader("Choose a file", type=["pdf", "txt", "csv", "xlsx"], accept_multiple_files=True)
 
 
 def render_uploaded_documents(documents: Dict[str, str]):

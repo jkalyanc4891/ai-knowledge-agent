@@ -1,7 +1,12 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore" # Prevents crashing if extra vars are in Render
+    )
     # --- App ---
     APP_NAME: str = "AI Knowledge & Decision Support System"
     APP_ENV: str = Field("local", description="Environment: local | dev | prod")
@@ -22,9 +27,5 @@ class Settings(BaseSettings):
 
     # --- Chroma Persistence ---
     CHROMA_PERSIST_DIR: str | None = ".chroma"
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
 
 settings = Settings()

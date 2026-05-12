@@ -1,0 +1,62 @@
+services:
+  # ============================================================
+  # AI BACKEND SERVICE (FastAPI + ChromaDB)
+  # ============================================================
+  - type: web
+    name: ai-backend
+    runtime: python
+    region: ohio
+    plan: starter  # REQUIRED for persistent disk support
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10
+      - key: APP_ENV
+        value: prod
+      - key: VECTOR_DB_BACKEND
+        value: chroma
+      - key: LOG_LEVEL
+        value: INFO
+      - key: API_V1_PREFIX
+        value: /api
+
+      # Persistence: Points Chroma to the mounted SSD disk
+      - key: CHROMA_PERSIST_DIR
+        value: /var/chroma
+
+      # OpenAI Configuration: Keys are handled in the Dashboard for security
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.4-mini
+      - key: OPENAI_EMBEDDING_MODEL
+        value: text-embedding-3-large
+
+    # Persistent SSD Disk for ChromaDB data
+    disk:
+      name: chroma-data
+      mountPath: /var/chroma
+      sizeGB: 1
+
+  # ============================================================
+  # AI UI SERVICE (Streamlit)
+  # ============================================================
+  - type: web
+    name: ai-ui
+    runtime: python
+    region: ohio
+    plan: free  # UI can stay on free tier to save cost
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run ui/main_app.py --server.port 10000 --server.address 0.0.0.0
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10
+      - key: APP_NAME
+        value: "AI Knowledge & Decision Support System"
+
+      # Internal Networking: Connects UI to Backend without going over the public internet
+      - key: BACKEND_URL
+        value: http://ai-backend:10000

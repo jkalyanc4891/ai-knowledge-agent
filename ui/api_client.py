@@ -11,7 +11,7 @@ class APIClient:
         self.base_url = base_url.rstrip("/")
 
     # -------------------------
-    # D
+    # Safe Request
     # -------------------------
     def _safe_request(self, method, url, **kwargs):
         try:
@@ -28,25 +28,20 @@ class APIClient:
     # -------------------------
     # Document Upload
     # -------------------------
-    def upload_document(self, file) -> Dict[str, Any]:
-        #url = f"{self.base_url}/documents/"
-        #files = {"file": (file.name, file.getvalue())}
-        #response = requests.post(url, files=files)
-        #response.raise_for_status()
-        #return response.json()
+    def upload_documents(self, files_list) -> Dict[str, Any]:
         url = f"{self.base_url}/documents/"
-        files = {"file": (file.name, file.getvalue())}
+        files = [
+            ("files", (f.name, f.getvalue()))
+            for f in files_list
+        ]
         return self._safe_request("POST", url, files=files)
+
+
 
     # -------------------------
     # Query
     # -------------------------
     def query(self, query: str, document_ids: List[str]) -> Dict[str, Any]:
-        #url = f"{self.base_url}/query/"
-        #payload = {"query": query, "document_ids": document_ids}
-        #response = requests.post(url, json=payload)
-        #response.raise_for_status()
-        #return response.json()
         url = f"{self.base_url}/query"
         payload = {"query": query, "document_ids": document_ids}
         return self._safe_request("POST", url, json=payload)
@@ -55,10 +50,6 @@ class APIClient:
     # Health Check
     # -------------------------
     def health(self) -> Dict[str, Any]:
-        #url = f"{self.base_url}/health/"
-        #response = requests.get(url)
-        #response.raise_for_status()
-        #return response.json()
         url = f"{self.base_url}/health/"
         return self._safe_request("GET", url)
 
@@ -66,9 +57,5 @@ class APIClient:
     # Delete Document from Vector Store
     # -------------------------
     def delete_document(self, doc_id: str):
-        #url = f"{self.base_url}/documents/{doc_id}"
-        #response = requests.delete(url)
-        #response.raise_for_status()
-        #return response.json()
         url = f"{self.base_url}/documents/{doc_id}"
         return self._safe_request("DELETE", url)

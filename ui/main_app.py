@@ -61,29 +61,36 @@ def render_document_uploader():
         st.error(f"⚠️ You selected {len(uploaded_files)} files. Limit is {MAX_FILES}.")
         return
 
+    # Filter oversized files
+    valid_files = []
     for file in uploaded_files:
         size_mb = file.size / (1024 * 1024)
         if size_mb > MAX_UPLOAD_MB:
             st.warning(f"⚠️ {file.name} is {size_mb:.2f} MB (limit: {MAX_UPLOAD_MB} MB). Skipping.")
             continue
-
         if file.name in st.session_state.documents:
-            continue  # already uploaded this session
+            continue
+        valid_files.append(file)
 
-        with st.spinner(f"Uploading {file.name}..."):
-            result = api.upload_document(file)
+    if not valid_files:
+        return
 
-            if not result["ok"]:
-                st.error(result["error"])
-                return
+    with st.spinner("Uploading documents..."):
+        result = api.upload_documents(valid_files)
 
-            doc_info = result["data"]
-            st.session_state.documents[file.name] = {
-                "id": doc_info["document_id"],
-                "chunks": doc_info.get("chunks", 0),
+    if not result["ok"]:
+        st.error(result["error"])
+        return
+
+    for item in result["data"]["results"]:
+        if "error" in item:
+            st.error(f"{item['filename']}: {item['error']}")
+        else:
+            st.session_state.documents[item["filename"]] = {
+                "id": item["document_id"],
+                "chunks": item["chunks"],
             }
-
-            st.success(f"Uploaded: {file.name} ({doc_info.get('chunks', 0)} chunks)")
+            st.success(f"Uploaded: {item['filename']} ({item['chunks']} chunks)")
 
 
 def render_uploaded_documents():
