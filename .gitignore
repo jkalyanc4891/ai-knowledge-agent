@@ -97,3 +97,5 @@ streamlit_app/__pycache__/
 .env.dev
 .env.prod
 .env.test
+
+.idea/

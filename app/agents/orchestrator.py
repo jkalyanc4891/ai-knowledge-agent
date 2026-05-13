@@ -2,6 +2,7 @@ from typing import List
 from .planner_agent import PlannerAgent
 from .retrieval_agent import RetrievalAgent
 from .reasoning_agent import ReasoningAgent
+from .schemas import PlanSchema
 from .validator_agent import ValidatorAgent
 from app.rag.pipeline import RAGPipeline
 
@@ -25,38 +26,30 @@ class AgentOrchestrator:
 
     def run(self, query: str, document_ids: List[str]):
         # 1. Planner decides retrieval strategy
-        plan = self.planner.plan(query, document_ids)
+        raw_plan = self.planner.plan(query, document_ids)
 
         # ---------------------------
         # ⭐ FALLBACK PLAN PROTECTION
         # ---------------------------
 
-        # Ensure plan is a dict
-        if not isinstance(plan, dict):
-            plan = {}
+        try:
+            # This handles all type checking, defaults, and coercion in one go
+            plan = PlanSchema.model_validate(raw_plan)
+        except Exception:
+            # If the LLM output is total garbage,
+            # use a completely empty model which uses all defaults.
+            plan = PlanSchema()
 
-        # Validate retrieve flag
-        retrieve_flag = plan.get("retrieve", True)
-        if not isinstance(retrieve_flag, bool):
-            retrieve_flag = True
-
-        # Validate top_k
-        top_k = plan.get("top_k", 5)
-        if not isinstance(top_k, int) or top_k < 1:
-            top_k = 5
-
-        # Validate documents list
-        docs = plan.get("documents", document_ids)
-        if not isinstance(docs, list) or len(docs) == 0:
-            docs = document_ids
+            # Handle the dynamic fallback for document IDs
+        final_docs = plan.documents if plan.documents else document_ids
 
         # ---------------------------
         # 2. Retrieve chunks
         # ---------------------------
         retrieved = self.retriever.retrieve(
             query=query,
-            document_ids=docs,
-            top_k=top_k,
+            document_ids=final_docs,
+            top_k=plan.top_k,
         )
 
         # Build context for reasoning agent
