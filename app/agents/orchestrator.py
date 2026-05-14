@@ -1,8 +1,11 @@
 from typing import List
+
+from pydantic import ValidationError
+
 from .planner_agent import PlannerAgent
 from .retrieval_agent import RetrievalAgent
 from .reasoning_agent import ReasoningAgent
-from .schemas import PlanSchema
+from .schemas import AgentPlan
 from .validator_agent import ValidatorAgent
 from app.rag.pipeline import RAGPipeline
 
@@ -34,11 +37,11 @@ class AgentOrchestrator:
 
         try:
             # This handles all type checking, defaults, and coercion in one go
-            plan = PlanSchema.model_validate(raw_plan)
-        except Exception:
+            plan = AgentPlan.model_validate(raw_plan)
+        except (ValidationError, TypeError) as e:
             # If the LLM output is total garbage,
             # use a completely empty model which uses all defaults.
-            plan = PlanSchema()
+            plan = AgentPlan()
 
             # Handle the dynamic fallback for document IDs
         final_docs = plan.documents if plan.documents else document_ids

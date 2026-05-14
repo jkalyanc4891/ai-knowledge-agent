@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List
 
-class PlanSchema(BaseModel):
+class AgentPlan(BaseModel):
     retrieve: bool = Field(default=True)
     top_k: int = Field(default=5, ge=1)  # ge=1 ensures top_k is >= 1
     documents: List[str] = Field(default_factory=list)
