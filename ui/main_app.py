@@ -236,7 +236,8 @@ def main():
             **ℹ️ Note**
 
             - **Refresh / Reset** will delete *all* uploaded documents from **VectorDB** and clear the UI.
-            - **Remove** will remove the file from the **uploaded list** in the UI (and also deletes it from VectorDB for that single file).
+            - **Remove** will remove the files from the **uploaded list** in the UI (and also deletes from VectorDB).
+            - The application currently supports **English** text only
             """
         )
 
