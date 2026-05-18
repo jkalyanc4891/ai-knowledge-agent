@@ -26,7 +26,7 @@ services:
       - key: CHROMA_PERSIST_DIR
         value: /var/chroma
 
-      # OpenAI Configuration: Keys are handled in the Dashboard for security
+      # OpenAI Configuration
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
@@ -34,20 +34,19 @@ services:
       - key: OPENAI_EMBEDDING_MODEL
         value: text-embedding-3-large
 
-    # Persistent SSD Disk for ChromaDB data
     disk:
       name: chroma-data
       mountPath: /var/chroma
       sizeGB: 1
 
   # ============================================================
-  # AI UI SERVICE (Streamlit)
+  # AI UI SERVICE (Streamlit - Renamed)
   # ============================================================
   - type: web
-    name: ai-ui
+    name: ai-knowledge-agent  # <--- Updated name for a cleaner public URL
     runtime: python
     region: ohio
-    plan: free  # UI can stay on free tier to save cost
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: streamlit run ui/main_app.py --server.port 10000 --server.address 0.0.0.0
 
@@ -57,6 +56,10 @@ services:
       - key: APP_NAME
         value: "AI Knowledge & Decision Support System"
 
-      # Internal Networking: Connects UI to Backend without going over the public internet
-      - key: BACKEND_URL
-        value: http://ai-backend:10000
+      # DYNAMIC INTERNAL NETWORKING
+      # Looks up the backend hostport dynamically
+      - key: BACKEND_HOST
+        fromService:
+          type: web
+          name: ai-backend
+          property: hostport

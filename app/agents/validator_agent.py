@@ -1,6 +1,7 @@
 import json
 from openai import OpenAI
 from app.core.config import settings
+from app.core.logging import logger
 
 
 class ValidatorAgent:
@@ -17,6 +18,12 @@ class ValidatorAgent:
         self.model = settings.OPENAI_MODEL
 
     def validate(self, answer: str, context: str) -> dict:
+        default_plan = {
+            "grounded": False,
+            "confidence": 0.0,
+            "explanation": "Validation failed"
+       }
+
         system_prompt = (
             "You are a validation agent in a Retrieval-Augmented Generation (RAG) system. "
             "Your job is to determine whether the provided answer is grounded in the given context. "
@@ -44,6 +51,13 @@ class ValidatorAgent:
         )
 
         try:
-            return json.loads(response.choices[0].message.content.strip())
-        except Exception:
-            return {"grounded": False, "confidence": 0.0, "explanation": "Validation failed"}
+            content = response.choices[0].message.content
+            if not content:
+                logger.warning("LLM validation response content was empty; using default plan.")
+                return default_plan
+
+            return json.loads(content.strip())
+
+        except (json.JSONDecodeError, IndexError, AttributeError, TypeError) as e:
+            logger.warning("Failed to parse LLM validator plan; using default. Error: %s", e)
+            return default_plan

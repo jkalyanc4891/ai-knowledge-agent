@@ -2,6 +2,7 @@ import json
 from typing import List
 from openai import OpenAI
 from app.core.config import settings
+from app.core.logging import logger
 
 
 class PlannerAgent:
@@ -17,6 +18,12 @@ class PlannerAgent:
         self.model = settings.OPENAI_MODEL
 
     def plan(self, query: str, document_ids: List[str]) -> dict:
+        default_plan = {
+            "retrieve": True,
+            "top_k": 5,
+            "documents": document_ids,
+        }
+
         system_prompt = (
             "You are a planning agent for a Retrieval-Augmented Generation (RAG) system. "
             "Your job is to decide how retrieval should be performed. "
@@ -54,6 +61,14 @@ class PlannerAgent:
         )
 
         try:
-            return json.loads(response.choices[0].message.content.strip())
-        except Exception:
-            return {"retrieve": True, "top_k": 5, "documents": document_ids}
+            content = response.choices[0].message.content
+
+            if not content:
+                logger.warning("LLM response content was empty; using default retrieval plan.")
+                return default_plan
+
+            return json.loads(content.strip())
+
+        except (json.JSONDecodeError, IndexError, AttributeError, TypeError) as e:
+            logger.warning("Failed to parse LLM retrieval plan; using default. Error: %s", e)
+            return default_plan

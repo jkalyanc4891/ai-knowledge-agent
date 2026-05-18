@@ -1,5 +1,7 @@
 import requests
 from typing import List, Dict, Any
+import logging
+logger = logging.getLogger(__name__)
 
 
 class APIClient:
@@ -18,11 +20,14 @@ class APIClient:
             response = requests.request(method, url, **kwargs)
             response.raise_for_status()
             return {"ok": True, "data": response.json()}
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection error: Backend is not reachable. Please ensure the FastAPI server is running.")
             return {"ok": False, "error": "Backend is not reachable. Please ensure the FastAPI server is running."}
         except requests.exceptions.HTTPError as e:
+            logger.error(f"HTTP error: {str(e)}")
             return {"ok": False, "error": f"HTTP error: {str(e)}"}
         except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
             return {"ok": False, "error": f"Unexpected error: {str(e)}"}
 
     # -------------------------
@@ -30,6 +35,7 @@ class APIClient:
     # -------------------------
     def upload_documents(self, files_list) -> Dict[str, Any]:
         url = f"{self.base_url}/documents/"
+        logger.info(f"Uploading {len(files_list)} files to {url}")
         files = [
             ("files", (f.name, f.getvalue()))
             for f in files_list
@@ -58,4 +64,5 @@ class APIClient:
     # -------------------------
     def delete_document(self, doc_id: str):
         url = f"{self.base_url}/documents/{doc_id}"
+        logger.info(f"Deleting {url}")
         return self._safe_request("DELETE", url)
