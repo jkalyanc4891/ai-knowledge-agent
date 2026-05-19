@@ -8,7 +8,6 @@ import logging
 # Config & API Client
 # -----------------------------------
 logger = logging.getLogger(__name__)
-#BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:10000")
 BACKEND_HOST = os.getenv("BACKEND_HOST", "localhost:10000")
 
 if not BACKEND_HOST.startswith("http"):
@@ -57,10 +56,11 @@ def render_document_uploader():
     st.subheader("📄 Upload Document")
 
     uploaded_files = st.file_uploader(
-        "Choose files (max 30 MB each)",
+        "Upload documents (up to 10 files, max 30 MB each)",
         type=["pdf", "txt", "csv", "xlsx"],
         accept_multiple_files=True,
         key=f"uploader_{st.session_state.uploader_key}",
+        help="Maximum of 10 files allowed. Each file must be 30 MB or smaller.",
         max_upload_size=MAX_UPLOAD_MB# 🔥 resets when key changes
     )
 
@@ -68,7 +68,7 @@ def render_document_uploader():
         return
 
     if len(uploaded_files) > MAX_FILES:
-        st.error(f"⚠️ You selected {len(uploaded_files)} files. Limit is {MAX_FILES}.")
+        st.error(f"⚠️ You Uploaded {len(uploaded_files)} files. Limit is {MAX_FILES}.")
         return
 
     # Filter oversized files
@@ -247,7 +247,8 @@ def main():
 
             - **Refresh / Reset** will delete *all* uploaded documents from **VectorDB** and clear the UI.
             - **Remove** will remove the files from the **uploaded list** in the UI (and also deletes from VectorDB).
-            - The application currently supports **English** text only
+            - **Supported Input:** English plain text and common document formats (PDF, TXT, CSV, XLSX).
+            - **Not supported:** Image OCR, scanned documents, or non‑English text.
             """
         )
 
