@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, field_validator
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -27,5 +28,17 @@ class Settings(BaseSettings):
 
     # --- Chroma Persistence ---
     CHROMA_PERSIST_DIR: str | None = ".chroma"
+
+    # ==========================================
+    # VALIDATORS (Strips accidental whitespaces,
+    # newlines (\n), and carriage returns (\r)
+    # from the API key to prevent HTTP Header protocol errors.)
+    # ==========================================
+    @field_validator("OPENAI_API_KEY")
+    @classmethod
+    def sanitize_api_key(cls, v: str | None) -> str | None:
+        if v:
+            return v.strip().replace("\n", "").replace("\r", "")
+        return v
 
 settings = Settings()
