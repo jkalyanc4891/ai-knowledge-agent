@@ -1,11 +1,21 @@
 import streamlit as st
+import os
 from typing import List, Dict, Any
 from api_client import APIClient
+import logging
 
 # -----------------------------------
 # Config & API Client
 # -----------------------------------
-API_BASE_URL = "http://localhost:8000/api"
+logger = logging.getLogger(__name__)
+#BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:10000")
+BACKEND_HOST = os.getenv("BACKEND_HOST", "localhost:10000")
+
+if not BACKEND_HOST.startswith("http"):
+    API_BASE_URL = f"http://{BACKEND_HOST}/api"
+else:
+    API_BASE_URL = f"{BACKEND_HOST.rstrip('/')}/api"
+logger.info("Base URL: {}".format(API_BASE_URL))
 MAX_UPLOAD_MB = 30
 MAX_FILES = 10
 api = APIClient(base_url=API_BASE_URL)
@@ -16,7 +26,7 @@ api = APIClient(base_url=API_BASE_URL)
 # -----------------------------------
 def init_session_state():
     if "documents" not in st.session_state:
-        st.session_state.documents = {}  # {filename: {"id": str, "chunks": int}}
+        st.session_state.documents = {}
 
     if "answer" not in st.session_state:
         st.session_state.answer = ""
