@@ -4,6 +4,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?logo=fastapi)](#)
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](#)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Enabled-orange)](#)
+[![Pydantic](https://img.shields.io/badge/Pydantic-E92063?logo=pydantic&logoColor=white)](#)
+[![OpenAI](https://img.shields.io/badge/OpenAI-412991?logo=openai&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-green)](#)
 [![Architecture](https://img.shields.io/badge/Architecture-View-purple)](./ARCHITECTURE.md)
 [![Sequence Diagram](https://img.shields.io/badge/Sequence-View-purple)](./SEQUENCE_DAIGRAM.md)
