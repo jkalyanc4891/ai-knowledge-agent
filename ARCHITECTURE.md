@@ -3,11 +3,6 @@
 The following diagram illustrates the core architecture of our system, organized into the UI Layer and the **Sense-Plan-Act** cognitive flow. 
 
 ```mermaid
-# System Architecture
-
-The following diagram illustrates the core architecture of our system, organized into the UI Layer and the **Sense-Plan-Act** cognitive flow. 
-
-```mermaid
 flowchart LR
 
 %% ============================
