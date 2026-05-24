@@ -52,13 +52,6 @@ REQUIRED_AGENT_RESULT_KEYS = {"answer", "sources", "confidence"}
 
 @router.post("/")
 async def query_documents(payload: QueryRequest):
-    """
-    Runs the full agentic RAG pipeline:
-    - Planner agent decides retrieval strategy
-    - Retriever fetches relevant chunks
-    - RAG pipeline synthesizes answer
-    - Validator agent checks grounding
-    """
 
     try:
         if not payload.query or not payload.query.strip():

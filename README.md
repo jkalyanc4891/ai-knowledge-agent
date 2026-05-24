@@ -87,9 +87,9 @@ To run the full stack locally, you will need to start the FastAPI backend and th
 * **Terminal 1: Start FastAPI Backend**
     ```bash
     # Ensure your virtual environment is active
-    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload
     ```
-    *The API will be accessible at `http://localhost:8000` with interactive Swagger docs at `/docs`.*
+    *The API will be accessible at `http://localhost:10000` with interactive Swagger docs at `/docs`.*
 
 * **Terminal 2: Start Streamlit UI**
     ```bash
@@ -105,49 +105,32 @@ To run the full stack locally, you will need to start the FastAPI backend and th
 
 This method is recommended for a consistent environment across different operating systems, as it packages all dependencies into a single container.
 
-**1. Build the Docker Image**
+**1. Prerequisites**
 
-From the root directory of the project, execute the following command to build the application image:
+Ensure you have a .env file in the root directory containing your API key:
 
 ```bash
-# Build the container with the tag 'rag-agent-app'
-docker build -t rag-agent-app .
+OPENAI_API_KEY=your_sk_key_here
 ```
-**2. Run the container**
+**2. Start the services**
 
 Once the image is built, execute the following command to spin up both the backend and the frontend services within the container:
 
 ```bash
-docker run -p 8000:8000 -p 8501:8501 rag-agent-app
-```
-**2. Run the container**
-
-Once the image is built, execute the following command to spin up both the backend and the frontend services within the container:
-
-```bash
-docker run -p 8000:8000 -p 8501:8501 rag-agent-app
+# Build and start all services defined in docker-compose.yml
+docker-compose up --build
 ```
 **3. Access the Services**
 
 Once the container is running, you can access the application components via your web browser at the following local addresses:
 
-| Service | URL | Description |
-| :--- | :--- | :--- |
-| **Backend API** | [http://localhost:8000/docs](http://localhost:8000/docs) | Interactive Swagger UI for testing endpoints. |
-| **Frontend UI** | [http://localhost:8501](http://localhost:8501) | Streamlit interface for document uploads and chat. |
+| Service | URL                                                       | Description |
+| :--- |:----------------------------------------------------------| :--- |
+| **Backend API** | [http://localhost:10000/docs](http://localhost:8000/docs) | Interactive Swagger UI for testing endpoints. |
+| **Frontend UI** | [http://localhost:8501](http://localhost:8501)            | Streamlit interface for document uploads and chat. |
 
-> [!NOTE]  
-> If you are running Docker on a remote server or a custom VM, replace `localhost` with the specific IP address of that machine.
-
-**4. Persist ChromaDB (optional)**
-
-```bash
-docker run \
-  -p 8000:8000 -p 8501:8501 \
-  -v $(pwd)/data/chroma:/app/data/chroma \
-  rag-agent-app
-
-```
+> [NOTE]  
+> The vector database is automatically persisted using a named volume (rag_vector_storage) defined in your docker-compose.yml. Your data will remain safe even when you stop or restart the containers.
 
 ## 📐 System Design [SENSE -> PLAN -> ACT]
 
@@ -169,11 +152,15 @@ ai-knowledge-agent/
 │   └── models/          # Pydantic models
 │
 ├── ui/                  # Streamlit frontend
-│   ├── main_app.py
-│   └── api_client.py
 │
+├── .env
 ├── requirements.txt
-├── Dockerfile
+├── Dockerfile.backend
+├── Dockerfile.backend
+├── docker-compose.yml
+├── render.yaml          # Blueprint file for Render deployment
+├── ARCHITECTURE.md
+├── SEQUENCE_DIAGRAM.md
 └── README.md
 
 ```

@@ -58,6 +58,7 @@ class PlannerAgent:
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.0,
+            response_format={"type": "json_object"}
         )
 
         try:
