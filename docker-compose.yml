@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: rag_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY} # Passed from your host .env file
+      - OPENAI_MODEL=gpt-5.4-mini
+    volumes:
+      - chroma_data:/app/chroma_db # Persists the vector store across restarts
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rag_frontend
+    ports:
+      - "8501:8501"
+    environment:
+      # Docker internal networking: 'backend' resolves to the container above
+      - BACKEND_API_URL=http://backend:10000
+    depends_on:
+      - backend
+
+volumes:
+  chroma_data:
+    name: rag_vector_storage

@@ -8,7 +8,7 @@ import logging
 # Config & API Client
 # -----------------------------------
 logger = logging.getLogger(__name__)
-BACKEND_HOST = os.getenv("BACKEND_HOST", "localhost:10000")
+BACKEND_HOST = os.getenv("BACKEND_HOST", "localhost:10000") # Used Port:10000 to be inline with Render
 
 if not BACKEND_HOST.startswith("http"):
     API_BASE_URL = f"http://{BACKEND_HOST}/api"
@@ -249,6 +249,7 @@ def main():
             - **Remove** will remove the files from the **uploaded list** in the UI (and also deletes from VectorDB).
             - **Supported Input:** English plain text and common document formats (PDF, TXT, CSV, XLSX).
             - **Not supported:** Image OCR, scanned documents, or non‑English text.
+            - **Source Code:** [View on GitHub](https://github.com/jkalyanc4891/ai-knowledge-agent)
             """
         )
 

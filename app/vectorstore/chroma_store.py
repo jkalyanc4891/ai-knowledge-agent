@@ -7,7 +7,6 @@ class ChromaVectorStore(BaseVectorStore):
     def __init__(self):
         self.embedder = OpenAIEmbedder()
 
-        # ChromaDB 1.5.2 persistent client
         self.client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIR)
 
         # Create or get collection

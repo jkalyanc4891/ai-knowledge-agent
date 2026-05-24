@@ -38,11 +38,7 @@ class RAGGenerator:
     ) -> List[Dict[str, Any]]:
         """
         Simple passthrough of sources from retrieved contexts.
-
         In more advanced setups, you might:
-        - post-process
-        - deduplicate
-        - rank sources
         """
         sources = []
         for ctx in retrieved_contexts:
